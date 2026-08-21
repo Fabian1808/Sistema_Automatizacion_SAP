@@ -20,11 +20,12 @@ from PySide6.QtWidgets import (
 
 from ..sap.sap_connection import SapConnection
 from ..services.report_service import ReportService
+from ..services.state_service import StateService, DocumentState
 from ..utils.ids import analyze_ids
 
 
 class RunPanel(QWidget):
-    run_requested = Signal(list, bool)
+    run_requested = Signal(list, bool, str, bool)
 
     def __init__(self, config, doc_label, report_name):
         super().__init__()
@@ -36,6 +37,8 @@ class RunPanel(QWidget):
         self._last_dry = False
         self._failed_ids = []
         self._running = False
+        self._current_batch_id = None
+        self._state_service = StateService()
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -71,6 +74,11 @@ class RunPanel(QWidget):
         self.btn_process.setEnabled(False)
         self.btn_process.clicked.connect(self._on_process)
         layout.addWidget(self.btn_process)
+
+        self.btn_resume = QPushButton("Reanudar lote anterior")
+        self.btn_resume.setVisible(False)
+        self.btn_resume.clicked.connect(self._on_resume)
+        layout.addWidget(self.btn_resume)
 
         self.progress = QProgressBar()
         self.progress.setVisible(False)
@@ -150,7 +158,30 @@ class RunPanel(QWidget):
         if result["invalid"]:
             parts.append(f"{len(result['invalid'])} inválidos")
         self.counts_label.setText(" | ".join(parts))
+
+        # Verificar si hay lote anterior con pendientes/fallidos
+        self._check_resume_available()
         self.btn_process.setEnabled(bool(result["valid"]) and not self._running)
+
+    def _check_resume_available(self):
+        if not self._valid_ids:
+            self.btn_resume.setVisible(False)
+            return
+        # Buscar lotes recientes del mismo módulo
+        batches = self._state_service.list_batches(limit=10)
+        for batch in batches:
+            if batch.get("module_id") != self._doc_label.lower():
+                continue
+            pending = self._state_service.get_documents(
+                batch["batch_id"],
+                [DocumentState.PENDING, DocumentState.RETRY, DocumentState.FAILED],
+            )
+            if pending:
+                self._last_batch_id = batch["batch_id"]
+                self.btn_resume.setVisible(True)
+                self.btn_resume.setText(f"Reanudar lote ({len(pending)} pendientes)")
+                return
+        self.btn_resume.setVisible(False)
 
     def _on_process(self):
         if self._running or not self._valid_ids:
@@ -183,10 +214,25 @@ class RunPanel(QWidget):
             )
             if answer != QMessageBox.StandardButton.Yes:
                 return
-        self.run_requested.emit(self._valid_ids, dry_run)
+        self.run_requested.emit(self._valid_ids, dry_run, "", False)
 
-    def start_run(self, ids):
+    def _on_resume(self):
+        if not hasattr(self, "_last_batch_id") or self._running:
+            return
+        dry_run = self.dry_run_check.isChecked()
+        answer = QMessageBox.question(
+            self,
+            "Reanudar lote",
+            f"Reanudar lote anterior con {len(self._valid_ids)} documentos?\n"
+            "Se saltarán los ya procesados y se reintentarán los fallidos.",
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        self.run_requested.emit(self._valid_ids, dry_run, self._last_batch_id, True)
+
+    def start_run(self, ids, batch_id=""):
         self._running = True
+        self._current_batch_id = batch_id
         self._last_ids = list(ids)
         self._last_dry = self.dry_run_check.isChecked()
         self._failed_ids = []
@@ -196,6 +242,7 @@ class RunPanel(QWidget):
         self.progress.setValue(0)
         self.progress_label.setText("Preparando...")
         self.btn_process.setEnabled(False)
+        self.btn_resume.setVisible(False)
         self.btn_retry.setVisible(False)
         self.text_edit.setReadOnly(True)
         self.btn_excel.setEnabled(False)
@@ -260,4 +307,4 @@ class RunPanel(QWidget):
     def _on_retry(self):
         if self._running or not self._failed_ids:
             return
-        self.run_requested.emit(self._failed_ids, self._last_dry)
+        self.run_requested.emit(self._failed_ids, self._last_dry, "", False)

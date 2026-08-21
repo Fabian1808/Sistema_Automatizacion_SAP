@@ -1,0 +1,103 @@
+# Configuración de selectores SAP por módulo/transacción
+# Esta configuración permite cambiar selectores sin tocar código
+
+hes:
+  transaction: "ML81N"
+  sp01_transaction: "SP01"
+
+  # Árbol de navegación
+  tree:
+    root_path: "wnd[0]/shellcont/shell/shellcont[1]/shell[1]"
+    root_node: "          1"
+
+  # Botones toolbar
+  buttons:
+    otras_entradas: "wnd[0]/tbar[1]/btn[17]"
+    save_message: "wnd[0]/tbar[0]/btn[11]"      # btn[11] = Guardar
+    enter: "wnd[0]/tbar[0]/btn[3]"               # btn[3] = Enter/Continuar
+    grabar: "wnd[0]/tbar[0]/btn[15]"             # btn[15] = Grabar/Salvar
+
+  # Popup búsqueda HES
+  search_popup:
+    hes_field: "wnd[1]/usr/ctxtRM11R-LBLNI"
+    ok_button: "wnd[1]/tbar[0]/btn[0]"
+
+  # Tabla mensajes (NAST)
+  message_table:
+    kscl_column: "wnd[0]/usr/tblSAPDV70ATC_NAST3/ctxtDNAST-KSCHL[1,{row}]"
+    nacha_column: "wnd[0]/usr/tblSAPDV70ATC_NAST3/cmbNAST-NACHA[3,{row}]"
+    kscl_value: "NEU"
+    nacha_value: "1"
+    max_rows: 20
+
+  # Configuración despacho/impresión
+  dispatch:
+    vsztp_combo: "wnd[0]/usr/cmbNAST-VSZTP"
+    vsztp_value: "4"  # Inmediato
+
+  output_device:
+    ldest_field: "wnd[0]/usr/ctxtNAST-LDEST"
+    ldest_value: "LOCL"
+    tdover_combo: "wnd[0]/usr/cmbNAST-TDOCOVER"
+    tdover_value: "D"
+
+  # SP01 - Spool
+  sp01:
+    refresh_button: "wnd[0]/tbar[1]/btn[8]"
+    checkbox_first: "wnd[0]/usr/chk[1,3]"
+    print_button: "wnd[0]/tbar[1]/btn[13]"
+
+  # Virtual Keys
+  vkeys:
+    enter: 0
+    f5: 5
+    f7: 7
+    shift_f1: 13
+
+  # Timeouts (segundos)
+  timeouts:
+    dialog: 15
+    long_wait: 8.0
+    pdf_wait: 45
+    default: 30
+
+  # Palabras clave para detectar errores en barra de estado
+  error_keywords:
+    - "no existe"
+    - "no encontrad"
+    - "bloquead"
+    - "no autorizad"
+    - "no permitid"
+    - "error"
+
+
+# Configuración para Órdenes de Compra (placeholder)
+oc:
+  transaction: "ME23N"
+  # ... selectores específicos OC
+
+
+# Configuración global
+global:
+  # Timeouts por defecto
+  default_timeout: 30
+  retry_attempts: 2
+  poll_interval: 0.5
+
+  # Rutas de salida
+  output:
+    base_folder: "~/Documents/SAP Documentos"
+    structure: "{doc_type}/{year}/{month_name}/{doc_id}.pdf"
+    months:
+      - "01-Enero"
+      - "02-Febrero"
+      - "03-Marzo"
+      - "04-Abril"
+      - "05-Mayo"
+      - "06-Junio"
+      - "07-Julio"
+      - "08-Agosto"
+      - "09-Septiembre"
+      - "10-Octubre"
+      - "11-Noviembre"
+      - "12-Diciembre"

@@ -26,14 +26,14 @@ class HesView(QWidget):
         layout.addWidget(self.panel, 1)
         self.panel.run_requested.connect(self._launch)
 
-    def _launch(self, ids, dry_run):
+    def _launch(self, ids, dry_run, batch_id="", resume=False):
         from ..modules.registry import build_default_registry
         from .worker import DocumentWorker
 
         module = build_default_registry().get("hes")
-        self.panel.start_run(ids)
+        self.panel.start_run(ids, batch_id)
         self._worker = DocumentWorker(
-            module, ids, self._config, self._log_service, dry_run
+            module, ids, self._config, self._log_service, dry_run, batch_id, resume
         )
         self._worker.progress.connect(self.panel.on_progress)
         self._worker.document_done.connect(self.panel.on_document)

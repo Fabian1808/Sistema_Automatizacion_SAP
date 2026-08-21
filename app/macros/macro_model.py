@@ -17,6 +17,7 @@ STEP_ACTIONS = [
     "close_popup",
     "check_error",
     "save_pdf",
+    "find_empty_row",
 ]
 
 ACTION_LABELS = {
@@ -36,6 +37,7 @@ ACTION_LABELS = {
     "close_popup": "Cerrar popup",
     "check_error": "Verificar mensaje de error",
     "save_pdf": "Guardar PDF (diálogo nativo)",
+    "find_empty_row": "Buscar fila vacía en tabla",
 }
 
 VKEY_ACTIONS = ("send_vkey", "send_vkey_active")
@@ -47,6 +49,13 @@ class MacroStep:
     path: str = ""
     value: str = ""
     key: int = 0
+    # Para find_empty_row
+    table_path: str = ""
+    column_path: str = ""
+    write_value: str = ""
+    combo_path: str = ""
+    combo_value: str = ""
+    max_rows: int = 20
 
     def to_dict(self):
         return {
@@ -54,6 +63,12 @@ class MacroStep:
             "path": self.path,
             "value": self.value,
             "key": self.key,
+            "table_path": self.table_path,
+            "column_path": self.column_path,
+            "write_value": self.write_value,
+            "combo_path": self.combo_path,
+            "combo_value": self.combo_value,
+            "max_rows": self.max_rows,
         }
 
     @classmethod
@@ -63,6 +78,12 @@ class MacroStep:
             path=data.get("path", ""),
             value=data.get("value", ""),
             key=int(data.get("key", 0)),
+            table_path=data.get("table_path", ""),
+            column_path=data.get("column_path", ""),
+            write_value=data.get("write_value", ""),
+            combo_path=data.get("combo_path", ""),
+            combo_value=data.get("combo_value", ""),
+            max_rows=int(data.get("max_rows", 20)),
         )
 
 

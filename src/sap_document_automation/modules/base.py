@@ -32,7 +32,7 @@ class DocumentModule(Protocol):
     def validate_ids(self, lines: List[str]) -> Dict[str, List[str]]:
         ...
 
-    def process_one(self, client: 'ISapClient', document_id: str, context: Dict[str, Any]) -> ProcessResult:
+    def process_one(self, client: 'ISapClient', document_id: str, context: Dict[str, Any]):
         ...
 
 

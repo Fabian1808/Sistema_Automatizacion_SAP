@@ -87,6 +87,8 @@ class MacroModule(DocumentModule):
             self._check_error(session)
         elif action == "save_pdf":
             save_pdf_via_dialog(target)
+        elif action == "find_empty_row":
+            self._execute_find_empty_row(session, step)
 
     def _check_error(self, session):
         text = session.status_bar_text()
@@ -95,3 +97,42 @@ class MacroModule(DocumentModule):
         for keyword in ("no existe", "no encontrad", "bloquead", "error"):
             if keyword.lower() in text.lower():
                 raise SapError(text.strip())
+
+    def _execute_find_empty_row(self, session, step):
+        """Busca la primera fila vacía en una tabla y escribe valores."""
+        column_path = step.column_path or step.path
+        write_value = step.write_value.replace("{ID}", "") if step.write_value else ""
+        combo_path = step.combo_path
+        combo_value = step.combo_value
+        max_rows = step.max_rows or 20
+
+        found_row = -1
+        for row in range(max_rows):
+            path = column_path.replace("{row}", str(row))
+            cell = session.find_optional(path)
+            if cell is None:
+                break
+            try:
+                text = cell.Text
+            except Exception:
+                text = ""
+            if not str(text).strip():
+                found_row = row
+                break
+
+        if found_row == -1:
+            raise SapError(
+                f"No se encontró un renglón vacío en la tabla (buscadas {max_rows} filas)."
+            )
+
+        # Escribir valor en la columna principal
+        target_path = column_path.replace("{row}", str(found_row))
+        if write_value:
+            session.set_text(target_path, write_value)
+
+        # Configurar combo si se especificó
+        if combo_path:
+            combo_target = combo_path.replace("{row}", str(found_row))
+            if combo_value:
+                session.set_combo_key(combo_target, combo_value)
+            session.find_by_id(combo_target).SetFocus()

@@ -12,9 +12,11 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMessageBox,
     QPushButton,
+    QSpinBox,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
+    QWidget,
 )
 
 from ..macros.macro_model import ACTION_LABELS, STEP_ACTIONS, VKEY_ACTIONS, Macro, MacroStep
@@ -32,7 +34,7 @@ class MacroEditorDialog(QDialog):
     def __init__(self, parent=None, macro=None):
         super().__init__(parent)
         self.setWindowTitle("Macro")
-        self.resize(780, 520)
+        self.resize(950, 560)
         self._macro = macro or Macro(name="")
 
         layout = QVBoxLayout(self)
@@ -52,11 +54,13 @@ class MacroEditorDialog(QDialog):
         steps_label.setObjectName("subtitle")
         layout.addWidget(steps_label)
 
-        self.steps_table = QTableWidget(0, 3)
-        self.steps_table.setHorizontalHeaderLabels(["Acción", "Ruta (findById)", "Valor / Tecla"])
-        self.steps_table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.Stretch
-        )
+        # Columnas: Acción | Ruta principal | Valor/Tecla | Tabla/Columna | Valor a escribir | Combo path | Combo valor | Max filas
+        self.steps_table = QTableWidget(0, 8)
+        self.steps_table.setHorizontalHeaderLabels([
+            "Acción", "Ruta (findById)", "Valor / Tecla",
+            "Columna a verificar", "Valor a escribir", "Combo path", "Combo valor", "Máx. filas"
+        ])
+        self.steps_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.steps_table.verticalHeader().setVisible(False)
         layout.addWidget(self.steps_table, 1)
 
@@ -75,9 +79,10 @@ class MacroEditorDialog(QDialog):
 
         note = QLabel(
             'Use "{ID}" en el valor de un paso "Escribir texto" para insertar '
-            "el número de documento de cada lote."
+            "el número de documento de cada lote. Para 'Buscar fila vacía', use {row} en la ruta de la columna."
         )
         note.setObjectName("subtitle")
+        note.setWordWrap(True)
         layout.addWidget(note)
 
         buttons = QDialogButtonBox(
@@ -96,18 +101,47 @@ class MacroEditorDialog(QDialog):
     def _add_row(self, step):
         row = self.steps_table.rowCount()
         self.steps_table.insertRow(row)
+
         combo = QComboBox()
         for action in STEP_ACTIONS:
             combo.addItem(ACTION_LABELS.get(action, action), action)
         if step.action in STEP_ACTIONS:
             combo.setCurrentIndex(STEP_ACTIONS.index(step.action))
+        combo.currentIndexChanged.connect(lambda _, r=row: self._on_action_changed(r))
         self.steps_table.setCellWidget(row, 0, combo)
+
         self.steps_table.setItem(row, 1, QTableWidgetItem(step.path))
+        
         if step.action in VKEY_ACTIONS:
-            value = str(step.key) if step.key else ""
+            val = str(step.key) if step.key else ""
         else:
-            value = step.value
-        self.steps_table.setItem(row, 2, QTableWidgetItem(value))
+            val = step.value
+        self.steps_table.setItem(row, 2, QTableWidgetItem(val))
+
+        # Columnas específicas para find_empty_row
+        self.steps_table.setItem(row, 3, QTableWidgetItem(step.column_path))
+        self.steps_table.setItem(row, 4, QTableWidgetItem(step.write_value))
+        self.steps_table.setItem(row, 5, QTableWidgetItem(step.combo_path))
+        self.steps_table.setItem(row, 6, QTableWidgetItem(step.combo_value))
+        
+        max_rows_spin = QSpinBox()
+        max_rows_spin.setRange(1, 100)
+        max_rows_spin.setValue(step.max_rows if step.max_rows else 20)
+        self.steps_table.setCellWidget(row, 7, max_rows_spin)
+
+        self._update_row_visibility(row, step.action)
+
+    def _on_action_changed(self, row):
+        combo = self.steps_table.cellWidget(row, 0)
+        if combo:
+            action = combo.currentData()
+            self._update_row_visibility(row, action)
+
+    def _update_row_visibility(self, row, action):
+        """Muestra/oculta columnas según la acción."""
+        is_find_empty = action == "find_empty_row"
+        for col in [3, 4, 5, 6, 7]:
+            self.steps_table.setColumnHidden(col, not is_find_empty)
 
     def _remove_row(self):
         row = self.steps_table.currentRow()
@@ -149,7 +183,27 @@ class MacroEditorDialog(QDialog):
                 except ValueError:
                     key = 0
                 value = ""
-            steps.append(MacroStep(action=action, path=path, value=value, key=key))
+
+            # Campos adicionales para find_empty_row
+            column_path = self.steps_table.item(row, 3).text().strip() if self.steps_table.item(row, 3) else ""
+            write_value = self.steps_table.item(row, 4).text().strip() if self.steps_table.item(row, 4) else ""
+            combo_path = self.steps_table.item(row, 5).text().strip() if self.steps_table.item(row, 5) else ""
+            combo_value = self.steps_table.item(row, 6).text().strip() if self.steps_table.item(row, 6) else ""
+            
+            max_rows_widget = self.steps_table.cellWidget(row, 7)
+            max_rows = max_rows_widget.value() if max_rows_widget else 20
+
+            steps.append(MacroStep(
+                action=action,
+                path=path,
+                value=value,
+                key=key,
+                column_path=column_path,
+                write_value=write_value,
+                combo_path=combo_path,
+                combo_value=combo_value,
+                max_rows=max_rows,
+            ))
         return steps
 
     def _accept(self):

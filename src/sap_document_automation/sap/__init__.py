@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .interfaces import (
     ISapClient,
     SapElement,
@@ -7,15 +9,16 @@ from .interfaces import (
     SapNotRunningError,
     SapWindowState,
 )
-from .com_client import ComSapClient, SapClientFactory
+
+from .client import ComSapClient, SapClientFactory
 from .mock_client import MockSapClient
-from .sap_exceptions import (
+from .exceptions import (
     SapError,
-    SapNotRunningError as SapNotRunningError_,
-    SapScriptingDisabledError as SapScriptingDisabledError_,
+    SapNotRunningError,
+    SapScriptingDisabledError,
     SapNoSessionError,
-    SapSessionLostError as SapSessionLostError_,
-    SapElementNotFoundError as SapElementNotFoundError_,
+    SapSessionLostError,
+    SapElementNotFoundError,
     SapPopupError,
 )
 

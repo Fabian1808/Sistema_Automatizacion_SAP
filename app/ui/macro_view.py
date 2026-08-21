@@ -191,15 +191,15 @@ class MacroView(QWidget):
                 self.list.setCurrentRow(row)
                 return
 
-    def _launch(self, ids, dry_run):
+    def _launch(self, ids, dry_run, batch_id="", resume=False):
         if self._current is None:
             return
         from ..macros.macro_processor import MacroModule
 
         module = MacroModule(self._current)
-        self.panel.start_run(ids)
+        self.panel.start_run(ids, batch_id)
         self._worker = DocumentWorker(
-            module, ids, self._config, self._log_service, dry_run
+            module, ids, self._config, self._log_service, dry_run, batch_id, resume
         )
         self._worker.progress.connect(self.panel.on_progress)
         self._worker.document_done.connect(self.panel.on_document)
