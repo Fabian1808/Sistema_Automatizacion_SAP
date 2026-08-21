@@ -28,8 +28,15 @@ class HesModule(DocumentModule):
         batch_id = context.get("batch_id")
 
         result = ProcessResult(document_id=document_id, ok=False, error="")
+        import time as _time
 
         try:
+            if not dry_run and not file_service:
+                raise RuntimeError(
+                    "Ejecución real requiere FileService configurado (ruta de salida)"
+                )
+
+            start = _time.monotonic()
             target = None
             if not dry_run and file_service:
                 target = file_service.resolve_path("HES", document_id)
@@ -44,6 +51,7 @@ class HesModule(DocumentModule):
                 dry_run=dry_run,
                 target_path=str(target) if target else ""
             )
+            result.duration = _time.monotonic() - start
 
             if result_dict["ok"]:
                 result.ok = True

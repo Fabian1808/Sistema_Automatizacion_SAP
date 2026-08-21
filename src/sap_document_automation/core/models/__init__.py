@@ -90,11 +90,27 @@ class ProcessResult:
 @dataclass
 class BatchSummary:
     batch_id: str
-    counts: Dict[str, int]
-    total: int
+    counts: Dict[str, int] = field(default_factory=dict)
+    total: int = 0
+    results: List[ProcessResult] = field(default_factory=list)
+    duration_seconds: float = 0.0
+    started_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    finished_at: str = ""
+
+    @property
+    def success_count(self) -> int:
+        return self.counts.get("SUCCESS", sum(1 for r in self.results if r.ok))
+
+    @property
+    def error_count(self) -> int:
+        return self.counts.get("FAILED", sum(1 for r in self.results if not r.ok))
+
+    @property
+    def duplicate_count(self) -> int:
+        return self.counts.get("SKIPPED_DUPLICATE", 0)
 
     @property
     def success_rate(self) -> float:
         if self.total == 0:
             return 0.0
-        return self.counts.get("SUCCESS", 0) / self.total
+        return self.success_count / self.total

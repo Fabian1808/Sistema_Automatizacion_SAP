@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__version__ = "1.0.0"
+
 from .interfaces import (
     ISapClient,
     SapElement,
@@ -19,6 +21,7 @@ from .models import (
 )
 
 from .exceptions import (
+    SapError,
     SapAutomationError,
     SapNotRunningError,
     SapScriptingDisabledError,
@@ -45,6 +48,7 @@ __all__ = [
     "BatchInfo",
     "ProcessResult",
     "BatchSummary",
+    "SapError",
     "SapAutomationError",
     "SapNotRunningError",
     "SapScriptingDisabledError",

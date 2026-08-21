@@ -3,10 +3,77 @@ import time
 from .sap_exceptions import SapElementNotFoundError, SapSessionLostError
 
 
+class _SapElementAdapter:
+    """Adapta un elemento COM crudo a la interfaz SapElement (set_text/press/...)."""
+
+    def __init__(self, raw):
+        self._com = raw
+
+    def set_text(self, value):
+        try:
+            self._com.text = value
+        except Exception:
+            self._com.value = value
+
+    def get_text(self):
+        try:
+            return self._com.Text
+        except Exception:
+            return ""
+
+    def press(self):
+        self._com.press()
+
+    def set_focus(self):
+        self._com.SetFocus()
+
+    def set_combo_key(self, key):
+        self._com.key = key
+
+    def set_checked(self, checked=True):
+        try:
+            self._com.Selected = checked
+        except Exception:
+            self._com.selected = checked
+
+    def send_vkey(self, key):
+        self._com.sendVKey(key)
+
+    def set_top_node(self, node):
+        self._com.topNode = node
+
+    def exists(self):
+        try:
+            _ = self._com.Text
+            return True
+        except Exception:
+            return False
+
+
 class SapSession:
     def __init__(self, com_session, timeout=30):
         self._session = com_session
         self.timeout = timeout
+
+    # --- interfaz nueva (ISapClient) ------------------------------------
+    def find_element(self, path, timeout=None):
+        return _SapElementAdapter(self.find_by_id(path, timeout=timeout))
+
+    def get_status_bar_text(self):
+        return self.status_bar_text()
+
+    def get_window_state(self):
+        from .sap_exceptions import SapError  # noqa: F401
+        busy = True
+        try:
+            busy = bool(self._session.Busy)
+        except Exception:
+            pass
+        from collections import namedtuple
+        state = namedtuple("SapWindowState", ["busy", "status_bar_text"])
+        return state(busy=busy, status_bar_text=self.status_bar_text())
+
+    # --- interfaz clásica ------------------------------------------------
 
     def find_by_id(self, path, timeout=None):
         limit = time.monotonic() + (timeout or self.timeout)
@@ -21,7 +88,7 @@ class SapSession:
 
     def find_optional(self, path):
         try:
-            return self._session.findById(path)
+            return _SapElementAdapter(self._session.findById(path))
         except Exception:
             return None
 
@@ -47,7 +114,7 @@ class SapSession:
         if element is None:
             return ""
         try:
-            return element.Text
+            return element.get_text()
         except Exception:
             return ""
 

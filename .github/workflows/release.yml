@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,build]"
+
+      - name: Run tests
+        run: pytest -q --tb=short
+
+      - name: Build executable con PyInstaller
+        run: >
+          pyinstaller --noconfirm --clean --windowed --onefile
+          --name SapDocumentAutomation
+          --add-data "config;sap_selectors"
+          src/run_app.py
+
+      - name: Prepare installer directory
+        run: |
+          New-Item -ItemType Directory -Force -Path installer_output | Out-Null
+          Copy-Item dist/SapDocumentAutomation.exe installer_output/
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Build installer con Inno Setup
+        run: >
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /O"installer_output"
+          installer\SapDocumentAutomation.iss
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer_output/*.exe
+          body_path: RELEASE_NOTES.md
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'beta') }}

@@ -12,7 +12,8 @@ def test_dry_run_completes():
     fake = FakeSession()
     result = module.process_one(SapSession(fake, timeout=1), "1042866626", {"dry_run": True})
     assert result.ok
-    assert fake.transactions == ["ML81N"]
+    # Dry-run ejecuta el flujo completo: búsqueda en ML81N + spool en SP01
+    assert fake.transactions == ["ML81N", "SP01"]
 
 
 def test_dry_run_fills_popup_with_id():

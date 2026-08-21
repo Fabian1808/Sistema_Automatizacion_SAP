@@ -113,3 +113,14 @@ class SapScriptingDisabledError(Exception):
 
 class SapNotRunningError(Exception):
     pass
+
+# Re-exports para compatibilidad con módulos que importan excepciones desde aquí
+from .sap_exceptions import (  # noqa: E402,F401
+    SapError,
+    SapNotRunningError,
+    SapScriptingDisabledError,
+    SapNoSessionError,
+    SapSessionLostError,
+    SapElementNotFoundError,
+    SapPopupError,
+)

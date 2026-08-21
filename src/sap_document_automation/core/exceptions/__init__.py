@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 
-class SapAutomationError(Exception):
-    """Excepción base del sistema."""
+class SapError(Exception):
+    """Raíz de todas las excepciones de la aplicación."""
     user_message: str = "Ocurrió un error en la automatización SAP."
 
     def __init__(self, detail: str = None, user_message: str = None):
@@ -14,6 +14,10 @@ class SapAutomationError(Exception):
         if self.detail:
             return f"{self._user_message} Detalle: {self.detail}"
         return self._user_message
+
+
+class SapAutomationError(SapError):
+    pass
 
 
 class SapNotRunningError(SapAutomationError):
