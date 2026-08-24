@@ -98,6 +98,24 @@ class StateService:
                 CREATE INDEX IF NOT EXISTS idx_documents_hash
                 ON documents(file_hash)
             """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_batches_created
+                ON batches(created_at DESC)
+            """)
+            self._migrate(conn)
+
+    @staticmethod
+    def _migrate(conn: sqlite3.Connection) -> None:
+        """Agrega columnas nuevas sin romper bases existentes."""
+        for column, decl in (
+            ("username", "TEXT DEFAULT ''"),
+            ("status", "TEXT DEFAULT ''"),
+            ("finished_at", "TEXT DEFAULT ''"),
+        ):
+            try:
+                conn.execute(f"ALTER TABLE batches ADD COLUMN {column} {decl}")
+            except sqlite3.OperationalError:
+                pass  # ya existe
 
     def _now(self) -> str:
         return datetime.now().isoformat()
@@ -117,16 +135,27 @@ class StateService:
         module_id: str,
         document_ids: List[str],
         config_snapshot: Optional[Dict] = None,
+        username: str = "",
     ) -> None:
         now = self._now()
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO batches
-                (batch_id, module_id, total_documents, created_at, updated_at, config_snapshot)
-                VALUES (?, ?, ?, ?, ?, ?)
+                (batch_id, module_id, total_documents, created_at, updated_at,
+                 config_snapshot, username, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (batch_id, module_id, len(document_ids), now, now, json.dumps(config_snapshot or {})),
+                (
+                    batch_id,
+                    module_id,
+                    len(document_ids),
+                    now,
+                    now,
+                    json.dumps(config_snapshot or {}),
+                    username,
+                    "RUNNING",
+                ),
             )
             for doc_id in document_ids:
                 conn.execute(
@@ -225,13 +254,45 @@ class StateService:
                 counts[state.value] = row[0] if row else 0
             return counts
 
-    def list_batches(self, limit: int = 50) -> List[Dict]:
+    def list_batches(self, limit: int = 50, offset: int = 0) -> List[Dict]:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
-                "SELECT * FROM batches ORDER BY created_at DESC LIMIT ?", (limit,)
+                """
+                SELECT b.*,
+                    (SELECT COUNT(*) FROM documents d
+                     WHERE d.batch_id = b.batch_id AND d.state = 'SUCCESS') AS ok_count,
+                    (SELECT COUNT(*) FROM documents d
+                     WHERE d.batch_id = b.batch_id AND d.state = 'FAILED') AS failed_count,
+                    (SELECT COUNT(*) FROM documents d
+                     WHERE d.batch_id = b.batch_id AND d.state = 'SKIPPED_DUPLICATE'
+                    ) AS duplicate_count,
+                    (SELECT COALESCE(SUM(d.duration), 0) FROM documents d
+                     WHERE d.batch_id = b.batch_id) AS total_duration
+                FROM batches b
+                ORDER BY b.created_at DESC
+                LIMIT ? OFFSET ?
+                """,
+                (limit, offset),
             ).fetchall()
             return [dict(r) for r in rows]
+
+    def count_batches(self) -> int:
+        with sqlite3.connect(self.db_path) as conn:
+            return conn.execute("SELECT COUNT(*) FROM batches").fetchone()[0]
+
+    def set_batch_status(self, batch_id: str, status: str) -> None:
+        finished = self._now() if status != "RUNNING" else ""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute(
+                """
+                UPDATE batches
+                SET status = ?, updated_at = ?,
+                    finished_at = CASE WHEN ? <> '' THEN ? ELSE '' END
+                WHERE batch_id = ?
+                """,
+                (status, self._now(), finished, finished, batch_id),
+            )
 
     def _update_doc(self, batch_id: str, document_id: str, fields: Dict[str, Any]) -> None:
         now = self._now()

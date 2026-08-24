@@ -1,5 +1,6 @@
 import time
 import uuid
+import getpass
 from typing import Optional
 
 from PySide6.QtCore import QThread, Signal
@@ -35,6 +36,31 @@ class DocumentWorker(QThread):
         self._resume = resume
         self._batch_id = batch_id or f"{module.module_id}_{uuid.uuid4().hex[:8]}"
         self._state_service = StateService()
+        self._cancel_requested = False
+        self._cancelled = False
+        self._connection: Optional[SapConnection] = None
+        self._session = None
+
+    # --- control de ejecución -------------------------------------------------
+    def request_cancel(self) -> None:
+        """Solicita detener el lote tras el documento en curso."""
+        self._cancel_requested = True
+
+    @property
+    def cancelled(self) -> bool:
+        return self._cancelled
+
+    def _get_session(self):
+        if self._session is None:
+            if self._connection is None:
+                self._connection = SapConnection(
+                    timeout=self._config.get("sap_timeout_seconds")
+                )
+            self._session = self._connection.get_session()
+        return self._session
+
+    def _drop_session(self) -> None:
+        self._session = None
 
     def run(self):
         file_service = FileService(
@@ -43,6 +69,10 @@ class DocumentWorker(QThread):
         )
 
         if not self._resume:
+            try:
+                username = getpass.getuser()
+            except Exception:
+                username = ""
             self._state_service.create_batch(
                 self._batch_id,
                 self._module.module_id,
@@ -51,13 +81,20 @@ class DocumentWorker(QThread):
                     "dry_run": self._dry_run,
                     "overwrite_existing": self._config.get("overwrite_existing"),
                 },
+                username=username,
             )
+        else:
+            self._state_service.set_batch_status(self._batch_id, "RUNNING")
         self.batch_created.emit(self._batch_id)
 
         results = []
         total = len(self._ids)
 
         for index, doc_id in enumerate(self._ids, start=1):
+            if self._cancel_requested:
+                self._cancelled = True
+                break
+
             self.progress.emit(index - 1, total, doc_id)
 
             if self._resume:
@@ -73,31 +110,11 @@ class DocumentWorker(QThread):
                     self.progress.emit(index, total, doc_id)
                     results.append(result)
                     continue
-                elif doc_record and doc_record.state == DocumentState.FAILED:
-                    # Reintentar fallidos
-                    pass  # continúa procesando
 
             self._state_service.mark_processing(self._batch_id, doc_id)
             start = time.monotonic()
 
-            try:
-                session = SapConnection(
-                    timeout=self._config.get("sap_timeout_seconds")
-                ).get_session()
-                result = self._module.process_one(
-                    session,
-                    doc_id,
-                    {
-                        "dry_run": self._dry_run,
-                        "log_service": self._log_service,
-                        "file_service": file_service,
-                        "max_retries": self._config.get("max_retries"),
-                        "batch_id": self._batch_id,
-                        "state_service": self._state_service,
-                    },
-                )
-            except Exception as exc:
-                result = ProcessResult(document_id=doc_id, ok=False, error=str(exc))
+            result = self._process_with_retry(doc_id, file_service)
 
             result.duration = time.monotonic() - start
 
@@ -123,7 +140,9 @@ class DocumentWorker(QThread):
                     self._batch_id, doc_id, result.file_path, result.duration
                 )
             else:
-                self._state_service.mark_failed(self._batch_id, doc_id, result.error)
+                self._state_service.mark_failed(
+                    self._batch_id, doc_id, result.error
+                )
 
             action = "Prueba" if self._dry_run else "PDF"
             self._log_service.write(
@@ -136,12 +155,48 @@ class DocumentWorker(QThread):
             self.progress.emit(index, total, doc_id)
             results.append(result)
 
+        self._finish_batch(results, total)
         self.run_finished.emit(results)
+
+    def _process_with_retry(self, doc_id, file_service) -> ProcessResult:
+        """Procesa un documento reintentando una vez si la sesión SAP murió."""
+        context = {
+            "dry_run": self._dry_run,
+            "log_service": self._log_service,
+            "file_service": file_service,
+            "max_retries": self._config.get("max_retries"),
+            "batch_id": self._batch_id,
+            "state_service": self._state_service,
+        }
+        for attempt in (1, 2):
+            try:
+                session = self._get_session()
+                return self._module.process_one(session, doc_id, context)
+            except Exception as exc:
+                self._drop_session()
+                if attempt == 2:
+                    return ProcessResult(document_id=doc_id, ok=False, error=str(exc))
+                # Segundo intento con sesión nueva; si SAP desapareció del todo,
+                # get_session volverá a fallar y se marca como error real.
+        return ProcessResult(document_id=doc_id, ok=False, error="inaccesible")
+
+    def _finish_batch(self, results, total) -> None:
+        processed = len(results)
+        if self._cancelled and processed < total:
+            status = "CANCELLED"
+        elif processed and all(r.ok for r in results):
+            status = "COMPLETED"
+        elif any(r.ok for r in results):
+            status = "PARTIAL"
+        else:
+            status = "FAILED"
+        self._state_service.set_batch_status(self._batch_id, status)
 
     def _file_hash(self, path: str) -> str:
         if not path:
             return ""
         import hashlib
+
         h = hashlib.sha256()
         try:
             with open(path, "rb") as f:

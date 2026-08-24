@@ -9,71 +9,28 @@ from PySide6.QtWidgets import (
 )
 
 from .hes_view import HesView
+from .macros_view import MacrosView
 from .sap_status_widget import SapStatusWidget
 
-QSS = """
-QMainWindow, QStackedWidget { background: #f5f6fa; }
-QListWidget#sidebar {
-    background: #1f2937;
-    color: #e5e7eb;
-    border: none;
-    font-size: 14px;
-    padding-top: 12px;
-    outline: 0;
-}
-QListWidget#sidebar::item { padding: 10px 14px; border-radius: 6px; margin: 2px 6px; }
-QListWidget#sidebar::item:selected { background: #2563eb; color: #ffffff; }
-QListWidget#sidebar::item:hover { background: #374151; }
-QLabel#title { font-size: 20px; font-weight: bold; color: #111827; }
-QLabel#subtitle { font-size: 13px; color: #6b7280; }
-QPushButton {
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 13px;
-    color: #111827;
-}
-QPushButton:hover { background: #f3f4f6; }
-QPushButton:disabled { color: #9ca3af; background: #e5e7eb; }
-QPushButton#primary {
-    background: #2563eb;
-    border: none;
-    color: #ffffff;
-    font-weight: bold;
-    padding: 12px 24px;
-    font-size: 14px;
-}
-QPushButton#primary:hover { background: #1d4ed8; }
-QPushButton#primary:disabled { background: #93c5fd; color: #eff6ff; }
-QPlainTextEdit, QTextEdit, QLineEdit {
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    padding: 8px;
-    font-size: 13px;
-}
-QPlainTextEdit:focus, QTextEdit:focus, QLineEdit:focus { border: 1px solid #2563eb; }
-QProgressBar {
-    border: none;
-    border-radius: 6px;
-    background: #e5e7eb;
-    height: 14px;
-    text-align: center;
-    font-size: 11px;
-}
-QProgressBar::chunk { background: #2563eb; border-radius: 6px; }
-QStatusBar { background: #ffffff; border-top: 1px solid #e5e7eb; }
-"""
-
 VIEW_FACTORIES = {
-    0: lambda w: HesView(w.config, w.log_service),
-    1: lambda w: _import_oc()(w),
-    2: lambda w: _import_macro()(w.config, w.log_service),
-    3: lambda w: _import_history()(w),
-    4: lambda w: _import_settings()(w.config),
-    5: lambda w: _import_help()(w),
+    0: lambda w: MacrosView(w.config, w.log_service),
+    1: lambda w: HesView(w.config, w.log_service),
+    2: lambda w: _import_oc()(),
+    3: lambda w: _import_macro()(w.config, w.log_service),
+    4: lambda w: _import_history()(),
+    5: lambda w: _import_settings()(w.config),
+    6: lambda w: _import_help()(),
 }
+
+MENU_LABELS = (
+    "Automatizaciones",
+    "HES",
+    "Órdenes de Compra",
+    "Macros VBS",
+    "Historial",
+    "Configuración",
+    "Ayuda",
+)
 
 
 def _import_oc():
@@ -123,20 +80,13 @@ class MainWindow(QMainWindow):
         self.menu = QListWidget()
         self.menu.setObjectName("sidebar")
         self.menu.setFixedWidth(190)
-        for label in (
-            "HES",
-            "Órdenes de Compra",
-            "Macros",
-            "Historial",
-            "Configuración",
-            "Ayuda",
-        ):
+        for label in MENU_LABELS:
             item = QListWidgetItem(label)
             item.setSizeHint(QSize(0, 44))
             self.menu.addItem(item)
 
         self.stack = QStackedWidget()
-        self._ensure_view(0)
+        self._ensure_view(0)  # solo la pantalla inicial; resto bajo demanda
 
         layout.addWidget(self.menu)
         layout.addWidget(self.stack, 1)
@@ -147,11 +97,24 @@ class MainWindow(QMainWindow):
 
         self.menu.currentRowChanged.connect(self._on_navigate)
         self.menu.setCurrentRow(0)
-        self.setStyleSheet(QSS)
+        macros_view = self._views[0]
+        macros_view.macro_selected.connect(self._on_macro_selected)
 
     def _on_navigate(self, index: int):
         self._ensure_view(index)
+        view = self._views.get(index)
+        if index == 0 and hasattr(view, "refresh_last_runs"):
+            view.refresh_last_runs()
         self.stack.setCurrentIndex(index)
+
+    def _on_macro_selected(self, module_id: str):
+        targets = {"hes": 1, "oc": 2, "vbs": 3}
+        index = targets.get(module_id)
+        if index is not None:
+            self.menu.setCurrentRow(index)
+
+    def navigate_to(self, index: int):
+        self.menu.setCurrentRow(index)
 
     def _ensure_view(self, index: int):
         if index in self._views:
@@ -160,31 +123,36 @@ class MainWindow(QMainWindow):
         self.stack.insertWidget(index, view)
         self._views[index] = view
 
+    # Accesos compatibles para tests / código existente
     @property
-    def hes_view(self):
+    def macros_view(self):
         return self._views[0]
 
     @property
-    def oc_view(self):
-        self._ensure_view(1)
+    def hes_view(self):
         return self._views[1]
 
     @property
-    def macro_view(self):
+    def oc_view(self):
         self._ensure_view(2)
         return self._views[2]
 
     @property
-    def history_view(self):
+    def macro_view(self):
         self._ensure_view(3)
         return self._views[3]
 
     @property
-    def settings_view(self):
+    def history_view(self):
         self._ensure_view(4)
         return self._views[4]
 
     @property
-    def help_view(self):
+    def settings_view(self):
         self._ensure_view(5)
         return self._views[5]
+
+    @property
+    def help_view(self):
+        self._ensure_view(6)
+        return self._views[6]

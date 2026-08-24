@@ -21,8 +21,17 @@ def main() -> int:
     from sap_document_automation.core.exceptions import SapError
     from sap_document_automation.services.log_service import LogService
 
-    LogService().setup()
-    log = __import__("logging").getLogger(__name__)
+    log_service = LogService()
+    import logging
+    import os
+
+    log_service.setup(
+        level=logging.DEBUG if os.environ.get("SAPDOC_DEBUG") else logging.INFO
+    )
+    from sap_document_automation.core.crash_guard import install_crash_handlers
+
+    install_crash_handlers(log_service.log_dir)
+    log = logging.getLogger(__name__)
 
     try:
         from PySide6.QtWidgets import QApplication

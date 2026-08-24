@@ -2,7 +2,7 @@
 ; Rutas relativas a ESTE archivo (installer\): el exe queda en ..\installer_output
 
 #define AppName "SAP Document Automation"
-#define AppVersion "1.0.3"
+#define AppVersion "1.0.4"
 #define AppPublisher "Fabian1808"
 #define AppExeName "SapDocumentAutomation.exe"
 

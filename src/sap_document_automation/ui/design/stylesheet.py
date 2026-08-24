@@ -112,4 +112,79 @@ QScrollBar::handle:vertical {{
     min-height: 30px;
 }}
 QScrollBar::add-line, QScrollBar::sub-line {{ height: 0; width: 0; }}
+
+/* ---------- Navegación lateral ---------- */
+QListWidget#sidebar {{
+    background-color: {T.SECONDARY};
+    color: #E8E8E8;
+    border: none;
+    font-size: 13px;
+    padding-top: 12px;
+    outline: 0;
+}}
+QListWidget#sidebar::item {{
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin: 2px 6px;
+}}
+QListWidget#sidebar::item:selected {{
+    background-color: {T.PRIMARY};
+    color: white;
+}}
+QListWidget#sidebar::item:hover {{
+    background-color: {T.SECONDARY_LIGHT};
+}}
+
+/* ---------- Textos de encabezado ---------- */
+QLabel#title {{
+    font-size: {T.FONT_SIZE_XL + 2}px;
+    font-weight: bold;
+    color: {T.SECONDARY};
+}}
+QLabel#subtitle {{ color: {T.TEXT_MUTED}; }}
+
+/* ---------- Botón primario legacy (objectName="primary") ---------- */
+QPushButton#primary {{
+    background-color: {T.PRIMARY};
+    color: white;
+    border: none;
+    font-weight: bold;
+    padding: 10px 22px;
+    font-size: {T.FONT_SIZE_LG}px;
+}}
+QPushButton#primary:hover {{ background-color: {T.PRIMARY_HOVER}; }}
+QPushButton#primary:pressed {{ background-color: {T.PRIMARY_PRESSED}; }}
+QPushButton#primary:disabled {{ background-color: #FFB38A; }}
+
+/* ---------- Tarjetas del centro de automatizaciones ---------- */
+QFrame#card {{
+    background-color: {T.SURFACE};
+    border: 1px solid {T.BORDER};
+    border-radius: 10px;
+}}
+QLabel#cardTitle {{
+    font-size: {T.FONT_SIZE_LG}px;
+    font-weight: bold;
+    color: {T.SECONDARY};
+}}
+QLabel#chipOk {{
+    background-color: #E5F3E6;
+    color: {T.SUCCESS};
+    border-radius: 9px;
+    padding: 2px 10px;
+    font-weight: bold;
+}}
+QLabel#chipSoon {{
+    background-color: #ECECEC;
+    color: {T.TEXT_MUTED};
+    border-radius: 9px;
+    padding: 2px 10px;
+    font-weight: bold;
+}}
+QTextBrowser {{
+    background-color: {T.SURFACE};
+    border: 1px solid {T.BORDER};
+    border-radius: {T.RADIUS}px;
+    padding: 10px;
+}}
 """

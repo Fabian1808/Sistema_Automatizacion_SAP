@@ -200,6 +200,13 @@ class MacroView(QWidget):
         self._worker = DocumentWorker(
             module, ids, self._config, self._log_service, dry_run, batch_id, resume
         )
+        self.panel._worker = self._worker
+        self.panel.cancel_requested.connect(
+            lambda w=self._worker: w.request_cancel()
+        )
+        self._worker.run_finished.connect(
+            lambda results, p=self.panel: setattr(p, "_was_cancelled", self._worker.cancelled)
+        )
         self._worker.progress.connect(self.panel.on_progress)
         self._worker.document_done.connect(self.panel.on_document)
         self._worker.run_finished.connect(self.panel.on_finished)
