@@ -2,7 +2,7 @@
 ; Rutas relativas a ESTE archivo (installer\): el exe queda en ..\installer_output
 
 #define AppName "SAP Document Automation"
-#define AppVersion "1.0.1"
+#define AppVersion "1.0.2"
 #define AppPublisher "Fabian1808"
 #define AppExeName "SapDocumentAutomation.exe"
 
@@ -11,7 +11,7 @@ AppId={{8E7C4B2A-3D1F-4E9A-B5C8-9F2D6A1B3C7E}}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
-DefaultDirName={autopf}\SapDocumentAutomation
+DefaultDirName={localappdata}\SapDocumentAutomation
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 OutputDir=..\installer_output
@@ -19,7 +19,7 @@ OutputBaseFilename=SapDocumentAutomation-Setup-{#AppVersion}
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-PrivilegesRequired=admin
+PrivilegesRequired=lowest
 UninstallDisplayIcon={app}\{#AppExeName}
 
 [Languages]
