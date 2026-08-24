@@ -1,6 +1,6 @@
-import json
+﻿import json
 
-from app.services.config_service import ConfigService
+from sap_document_automation.services.config_service import ConfigService
 
 
 def test_defaults(tmp_path):

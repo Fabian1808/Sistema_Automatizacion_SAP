@@ -42,6 +42,7 @@ class TestConfigService:
     def test_set_get_plain_value(self, tmp_path):
         svc = ConfigService(config_dir=tmp_path)
         svc.set("last_output_folder", "C:/docs")
+        svc.save()
         assert svc.get("last_output_folder") == "C:/docs"
         # Persistencia
         svc2 = ConfigService(config_dir=tmp_path)
@@ -51,17 +52,24 @@ class TestConfigService:
     def test_password_is_encrypted_on_disk(self, tmp_path):
         svc = ConfigService(config_dir=tmp_path)
         svc.set("password", "secreto123")
-        raw = (tmp_path / "config.json").read_text(encoding="utf-8")
+        svc.save()
+        raw = (tmp_path / "settings.json").read_text(encoding="utf-8")
         assert "secreto123" not in raw
 
     @pytest.mark.skipif(sys.platform != "win32", reason="DPAPI solo en Windows")
     def test_credentials_roundtrip(self, tmp_path):
         svc = ConfigService(config_dir=tmp_path)
         svc.set_credentials(user="USUARIO1", password="pass123", client="100")
-        creds = svc.get_credentials()
+        svc.save()
+        creds = ConfigService(config_dir=tmp_path).get_credentials()
         assert creds["user"] == "USUARIO1"
         assert creds["password"] == "pass123"
         assert creds["client"] == "100"
+
+    def test_defaults_preserved(self, tmp_path):
+        svc = ConfigService(config_dir=tmp_path)
+        assert svc.get("max_retries") == 2
+        assert svc.get("output_folder") == ""
 
     def test_missing_file_returns_empty(self, tmp_path):
         svc = ConfigService(config_dir=tmp_path / "no_existe")

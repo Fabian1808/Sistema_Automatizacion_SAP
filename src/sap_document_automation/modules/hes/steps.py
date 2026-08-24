@@ -1,17 +1,18 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
 from pathlib import Path
 
-from app.sap.interfaces import ISapClient, SapError, SapElementNotFoundError
-from app.services.file_service import FileService
-from app.services.state_service import StateService
-from app.config.sap_config_loader import get_hes_selectors, get_global_config
+from sap_document_automation.core.interfaces import ISapClient
+from sap_document_automation.sap.sap_exceptions import SapError, SapElementNotFoundError
+from sap_document_automation.services.file_service import FileService
+from sap_document_automation.services.state_service import StateService
+from sap_document_automation.config.sap_config_loader import get_hes_selectors, get_global_config
 
 if TYPE_CHECKING:
-    from app.sap.interfaces import ISapClient
+    from sap_document_automation.core.interfaces import ISapClient
 
 
 @dataclass
@@ -247,7 +248,7 @@ class HesGeneratePdf(SapStep):
             client.active_window_send_vkey(self.selectors["vkeys"]["shift_f1"])
             time.sleep(self.selectors["timeouts"]["long_wait"])
 
-            from app.services.native_dialog import save_pdf_via_dialog
+            from sap_document_automation.services.native_dialog import save_pdf_via_dialog
             from pathlib import Path
             save_pdf_via_dialog(
                 Path(target),
@@ -282,7 +283,7 @@ class HesOrchestrator:
         self._pdf_step = None
 
     def set_pdf_service(self, service: Any):
-        from app.modules.hes.steps import HesGeneratePdf
+        from sap_document_automation.modules.hes.steps import HesGeneratePdf
         self._pdf_step = HesGeneratePdf("Generar PDF", self.selectors, service)
 
     def run(self, client: 'ISapClient', document_id: str, dry_run: bool = False, target_path: str = "") -> Dict[str, Any]:

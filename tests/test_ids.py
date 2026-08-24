@@ -1,4 +1,4 @@
-from app.utils.ids import analyze_ids
+﻿from sap_document_automation.utils.ids import analyze_ids
 
 
 def test_single_valid():

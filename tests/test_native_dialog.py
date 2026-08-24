@@ -1,4 +1,4 @@
-from app.services.native_dialog import escape_sendkeys
+﻿from sap_document_automation.services.native_dialog import escape_sendkeys
 
 
 def test_plain_path_unchanged():

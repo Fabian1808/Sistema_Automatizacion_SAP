@@ -1,7 +1,7 @@
-import pytest
+﻿import pytest
 
-from app.sap.sap_exceptions import SapElementNotFoundError
-from app.sap.sap_session import SapSession
+from sap_document_automation.sap.sap_exceptions import SapElementNotFoundError
+from sap_document_automation.sap.session import SapSession
 from tests.fakes import FakeSession, FailingSession
 
 

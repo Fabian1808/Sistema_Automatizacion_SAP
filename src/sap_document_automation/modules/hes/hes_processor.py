@@ -1,12 +1,13 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 from typing import Any, Dict, Optional
 
-from app.modules.base import DocumentModule, ProcessResult
-from app.sap.interfaces import ISapClient, SapError
-from app.services.file_service import FileService
-from app.services.state_service import StateService
-from app.modules.hes.steps import HesOrchestrator
-from app.config.sap_config_loader import get_hes_selectors
+from sap_document_automation.modules.base import DocumentModule, ProcessResult
+from sap_document_automation.core.interfaces import ISapClient
+from sap_document_automation.sap.sap_exceptions import SapError
+from sap_document_automation.services.file_service import FileService
+from sap_document_automation.services.state_service import StateService
+from sap_document_automation.modules.hes.steps import HesOrchestrator
+from sap_document_automation.config.sap_config_loader import get_hes_selectors
 
 
 class HesModule(DocumentModule):
@@ -18,7 +19,7 @@ class HesModule(DocumentModule):
         self.orchestrator = HesOrchestrator(self.selectors)
 
     def validate_ids(self, lines: list) -> dict:
-        from app.utils.ids import analyze_ids
+        from sap_document_automation.utils.ids import analyze_ids
         return analyze_ids(lines)
 
     def process_one(self, client: ISapClient, document_id: str, context: dict) -> ProcessResult:

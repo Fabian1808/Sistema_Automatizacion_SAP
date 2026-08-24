@@ -1,4 +1,4 @@
-"""Helper de arranque compartido entre __main__.py y run_app.py."""
+﻿"""Helper de arranque compartido entre __main__.py y run_app.py."""
 from __future__ import annotations
 
 import sys
@@ -32,7 +32,7 @@ def main() -> int:
         app.setStyleSheet(build_stylesheet())
 
         try:
-            from app.ui.main_window import MainWindow  # type: ignore
+            from sap_document_automation.ui.main_window import MainWindow  # type: ignore
             window = MainWindow()
         except ImportError:
             log.warning("UI legacy no disponible; mostrando ventana placeholder")

@@ -1,5 +1,5 @@
-from app.modules.hes.hes_processor import HesModule
-from app.sap.sap_session import SapSession
+﻿from sap_document_automation.modules.hes.hes_processor import HesModule
+from sap_document_automation.sap.session import SapSession
 from tests.fakes import FakeSession
 
 

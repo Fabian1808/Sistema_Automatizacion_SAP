@@ -1,4 +1,4 @@
-"""Punto de entrada de la aplicación (src layout).
+﻿"""Punto de entrada de la aplicación (src layout).
 
 Ejecutar: python -m sap_document_automation
 o:        python src/run_app.py
@@ -35,7 +35,7 @@ def main() -> int:
 
         # UI principal: se resuelve desde el paquete legacy mientras dura la migración
         try:
-            from app.ui.main_window import MainWindow  # type: ignore
+            from sap_document_automation.ui.main_window import MainWindow  # type: ignore
         except ImportError:
             log.warning("UI legacy no disponible; mostrando ventana placeholder")
             from PySide6.QtWidgets import QLabel

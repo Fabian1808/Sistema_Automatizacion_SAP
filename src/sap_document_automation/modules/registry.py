@@ -1,4 +1,4 @@
-class ModuleRegistry:
+﻿class ModuleRegistry:
     def __init__(self):
         self._modules = {}
 
@@ -13,7 +13,7 @@ class ModuleRegistry:
 
 
 def build_default_registry():
-    from app.modules.hes.hes_processor import HesModule
+    from sap_document_automation.modules.hes.hes_processor import HesModule
 
     registry = ModuleRegistry()
     registry.register(HesModule())

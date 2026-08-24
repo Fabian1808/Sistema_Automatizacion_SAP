@@ -1,5 +1,5 @@
-from app.macros.macro_model import Macro, MacroStep
-from app.macros.macro_service import MacroService
+﻿from sap_document_automation.macros.macro_model import Macro, MacroStep
+from sap_document_automation.macros.macro_service import MacroService
 
 
 def test_save_and_load_roundtrip(tmp_path):

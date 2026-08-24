@@ -1,7 +1,7 @@
-import tempfile
+﻿import tempfile
 from pathlib import Path
 
-from app.services.state_service import StateService, DocumentState, DocumentRecord
+from sap_document_automation.services.state_service import StateService, DocumentState, DocumentRecord
 
 
 def test_create_batch_and_get_pending(tmp_path):

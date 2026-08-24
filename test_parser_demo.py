@@ -1,4 +1,4 @@
-from app.macros.vbs_parser import parse_vbs
+﻿from sap_document_automation.macros.vbs_parser import parse_vbs
 
 raw = open('ImprimirReporte.vbs', 'rb').read()
 text = raw.decode('utf-16') if raw[:2] in (b'\xff\xfe', b'\xfe\xff') else raw.decode('utf-8', errors='replace')

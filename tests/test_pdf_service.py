@@ -1,4 +1,4 @@
-from app.services.pdf_service import is_valid_pdf, wait_for_file, wait_for_pdf
+﻿from sap_document_automation.services.pdf_service import is_valid_pdf, wait_for_file, wait_for_pdf
 
 
 def test_wait_for_file_finds_existing(tmp_path):

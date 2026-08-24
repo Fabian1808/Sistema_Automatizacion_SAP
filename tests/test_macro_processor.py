@@ -1,6 +1,6 @@
-from app.macros.macro_model import Macro, MacroStep
-from app.macros.macro_processor import MacroModule
-from app.sap.sap_session import SapSession
+﻿from sap_document_automation.macros.macro_model import Macro, MacroStep
+from sap_document_automation.macros.macro_processor import MacroModule
+from sap_document_automation.sap.session import SapSession
 from tests.fakes import FakeSession
 
 MACRO = Macro(

@@ -1,4 +1,4 @@
-from app.macros.vbs_parser import parse_vbs
+﻿from sap_document_automation.macros.vbs_parser import parse_vbs
 
 SNIPPET = """
 Option Explicit
