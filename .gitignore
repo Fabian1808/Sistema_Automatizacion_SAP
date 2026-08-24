@@ -11,3 +11,4 @@ installer_output/
 .ruff_cache/
 *.spec
 *.iss.bak
+*.egg-info/

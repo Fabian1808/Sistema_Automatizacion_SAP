@@ -2,7 +2,7 @@
 
 from sap_document_automation.sap.sap_exceptions import SapElementNotFoundError
 from sap_document_automation.sap.session import SapSession
-from tests.fakes import FakeSession, FailingSession
+from tests.fakes import FailingSession, FakeSession
 
 
 def test_find_by_id_retries_then_raises():

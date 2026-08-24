@@ -1,15 +1,11 @@
 ﻿from __future__ import annotations
+
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
-from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List
 
 from sap_document_automation.core.interfaces import ISapClient
-from sap_document_automation.sap.sap_exceptions import SapError, SapElementNotFoundError
-from sap_document_automation.services.file_service import FileService
-from sap_document_automation.services.state_service import StateService
-from sap_document_automation.config.sap_config_loader import get_hes_selectors, get_global_config
 
 if TYPE_CHECKING:
     from sap_document_automation.core.interfaces import ISapClient
@@ -248,8 +244,9 @@ class HesGeneratePdf(SapStep):
             client.active_window_send_vkey(self.selectors["vkeys"]["shift_f1"])
             time.sleep(self.selectors["timeouts"]["long_wait"])
 
-            from sap_document_automation.services.native_dialog import save_pdf_via_dialog
             from pathlib import Path
+
+            from sap_document_automation.services.native_dialog import save_pdf_via_dialog
             save_pdf_via_dialog(
                 Path(target),
                 wait_timeout=self.selectors["timeouts"]["pdf_wait"]
@@ -311,7 +308,6 @@ class HesOrchestrator:
         return results
 
     def run_step_by_step(self, client: 'ISapClient', document_id: str, step_names: List[str], dry_run: bool = False) -> Dict[str, Any]:
-        step_map = {s.name: s for s in self.steps}
         results = {"steps": [], "ok": True, "error": ""}
         context = {"dry_run": dry_run}
 

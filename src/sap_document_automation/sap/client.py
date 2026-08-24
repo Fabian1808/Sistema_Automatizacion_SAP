@@ -1,19 +1,14 @@
 from __future__ import annotations
-import time
-import uuid
-from typing import Any, Callable, Dict, List, Optional
-from pathlib import Path
 
+import time
+from pathlib import Path
+from typing import Any, Callable, Dict, List
+
+from ..core.exceptions import SapError
 from ..core.interfaces import (
-    ISapClient,
-    SapElement,
     SapElementNotFoundError,
-    SapSessionLostError,
-    SapScriptingDisabledError,
-    SapNotRunningError,
     SapWindowState,
 )
-from ..core.exceptions import SapError
 
 
 class ComSapElement:
@@ -160,15 +155,12 @@ class ComSapClient:
         return ComSapElementWrapper(path, com_element)
 
     def find_element(self, path: str, timeout: float = 10.0):
-        from ..core.interfaces import SapElementNotFoundError
         limit = time.monotonic() + timeout
-        last_error = None
         while time.monotonic() < limit:
             try:
                 com_el = self._session.findById(path)
                 return ComSapElementWrapper(path, com_el)
-            except Exception as exc:
-                last_error = exc
+            except Exception:
                 time.sleep(0.5)
         raise SapElementNotFoundError(path, timeout)
 
@@ -235,7 +227,6 @@ class ComSapClient:
         self.send_vkey(0, window=popup_path)
 
     def get_window_state(self):
-        from ..core.interfaces import SapWindowState
         try:
             busy = self._is_busy()
         except Exception:

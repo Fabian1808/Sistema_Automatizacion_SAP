@@ -1,14 +1,13 @@
 from __future__ import annotations
+
 import sys
 from pathlib import Path
-
-import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from sap_document_automation.core.models import BatchSummary, ProcessResult  # noqa: E402
-from sap_document_automation.services.update_service import UpdateService, UpdateInfo  # noqa: E402
 from sap_document_automation.services.report_service import ReportService  # noqa: E402
+from sap_document_automation.services.update_service import UpdateInfo, UpdateService  # noqa: E402
 
 
 class TestVersionComparison:

@@ -30,4 +30,4 @@ jobs:
         run: ruff check src/ tests/
 
       - name: Tests con pytest
-        run: pytest -q --tb=short
+        run: python -m pytest -q --tb=short

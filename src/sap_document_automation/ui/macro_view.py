@@ -175,7 +175,6 @@ class MacroView(QWidget):
         dialog = MacroEditorDialog(self)
         dialog.name_edit.setText(dialog.name_edit.text() or "Nueva macro")
         dialog.steps_table.setRowCount(0)
-        from ..macros.macro_model import MacroStep
 
         for step in steps:
             dialog._add_row(step)

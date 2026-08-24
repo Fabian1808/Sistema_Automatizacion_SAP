@@ -24,6 +24,7 @@ def main() -> int:
 
     try:
         from PySide6.QtWidgets import QApplication, QLabel
+
         from sap_document_automation.ui.design import build_stylesheet
 
         app = QApplication(sys.argv)

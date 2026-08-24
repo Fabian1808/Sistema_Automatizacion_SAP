@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -6,7 +7,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from sap_document_automation.infrastructure.crypto import DpapiCrypto, CryptoError  # noqa: E402
+from sap_document_automation.infrastructure.crypto import CryptoError, DpapiCrypto  # noqa: E402
 from sap_document_automation.services.config_service import ConfigService  # noqa: E402
 from sap_document_automation.services.file_service import FileService  # noqa: E402
 

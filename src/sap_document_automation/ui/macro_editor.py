@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
-    QWidget,
 )
 
 from ..macros.macro_model import ACTION_LABELS, STEP_ACTIONS, VKEY_ACTIONS, Macro, MacroStep
@@ -111,7 +110,7 @@ class MacroEditorDialog(QDialog):
         self.steps_table.setCellWidget(row, 0, combo)
 
         self.steps_table.setItem(row, 1, QTableWidgetItem(step.path))
-        
+
         if step.action in VKEY_ACTIONS:
             val = str(step.key) if step.key else ""
         else:
@@ -123,7 +122,7 @@ class MacroEditorDialog(QDialog):
         self.steps_table.setItem(row, 4, QTableWidgetItem(step.write_value))
         self.steps_table.setItem(row, 5, QTableWidgetItem(step.combo_path))
         self.steps_table.setItem(row, 6, QTableWidgetItem(step.combo_value))
-        
+
         max_rows_spin = QSpinBox()
         max_rows_spin.setRange(1, 100)
         max_rows_spin.setValue(step.max_rows if step.max_rows else 20)
@@ -189,7 +188,7 @@ class MacroEditorDialog(QDialog):
             write_value = self.steps_table.item(row, 4).text().strip() if self.steps_table.item(row, 4) else ""
             combo_path = self.steps_table.item(row, 5).text().strip() if self.steps_table.item(row, 5) else ""
             combo_value = self.steps_table.item(row, 6).text().strip() if self.steps_table.item(row, 6) else ""
-            
+
             max_rows_widget = self.steps_table.cellWidget(row, 7)
             max_rows = max_rows_widget.value() if max_rows_widget else 20
 

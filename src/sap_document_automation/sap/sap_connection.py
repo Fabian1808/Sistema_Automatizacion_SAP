@@ -1,12 +1,9 @@
-import time
 
 from .sap_exceptions import (
-    SapElementNotFoundError,
     SapError,
     SapNoSessionError,
     SapNotRunningError,
     SapScriptingDisabledError,
-    SapSessionLostError,
 )
 
 

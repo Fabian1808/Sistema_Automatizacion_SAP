@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 
 from ..sap.sap_connection import SapConnection
 from ..services.report_service import ReportService
-from ..services.state_service import StateService, DocumentState
+from ..services.state_service import DocumentState, StateService
 from ..utils.ids import analyze_ids
 
 

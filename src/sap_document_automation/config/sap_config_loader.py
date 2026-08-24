@@ -1,17 +1,46 @@
 from __future__ import annotations
-import yaml
+
+import sys
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+import yaml
+
+
+def _default_config_path() -> Path:
+    """Resuelve sap_selectors.yaml en dev, bundle PyInstaller e instalado."""
+    name = "sap_selectors.yaml"
+    candidates: list = []
+
+    base = getattr(sys, "_MEIPASS", None)  # raíz del bundle PyInstaller
+    if base:
+        b = Path(base)
+        candidates += [b / "sap_selectors" / name, b / "config" / name]
+
+    here = Path(__file__).resolve()
+    candidates += [
+        here.parents[3] / "config" / name,
+        here.parents[2] / "config" / name,
+    ]
+
+    try:
+        exe_dir = Path(sys.executable).resolve().parent
+        candidates += [exe_dir / "config" / name, exe_dir / "sap_selectors" / name]
+    except Exception:
+        pass
+
+    for c in candidates:
+        if c.is_file():
+            return c
+    return candidates[-1]
 
 
 class SapConfigLoader:
     """Cargador de configuración SAP desde YAML con cache."""
 
     def __init__(self, config_path: Optional[Path] = None):
-        if config_path is None:
-            config_path = Path(__file__).parent.parent.parent.parent / "config" / "sap_selectors.yaml"
-        self.config_path = Path(config_path)
+        self.config_path = Path(config_path) if config_path else _default_config_path()
         self._config: Optional[Dict] = None
 
     def load(self) -> Dict[str, Any]:

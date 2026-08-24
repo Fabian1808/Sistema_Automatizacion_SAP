@@ -1,16 +1,12 @@
 from __future__ import annotations
+
 import time
-from typing import Any, Callable, Dict, List, Optional
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 from ..core.interfaces import (
-    ISapClient,
     SapElement,
-    SapElementNotFoundError,
-    SapSessionLostError,
-    SapScriptingDisabledError,
-    SapNotRunningError,
     SapWindowState,
 )
 
@@ -138,7 +134,6 @@ class MockSapClient:
         pass
 
     def get_window_state(self):
-        from ..core.interfaces import SapWindowState
         return SapWindowState(busy=self._busy, status_bar_text=self._status_bar)
 
     def take_screenshot(self, path: Path) -> bool:

@@ -26,13 +26,13 @@ jobs:
           pip install -e ".[dev,build]"
 
       - name: Run tests
-        run: pytest -q --tb=short
+        run: python -m pytest -q --tb=short
 
       - name: Build executable con PyInstaller
         run: >
           pyinstaller --noconfirm --clean --windowed --onefile
           --name SapDocumentAutomation
-          --add-data "config;sap_selectors"
+          --add-data "config/sap_selectors.yaml;sap_selectors"
           src/run_app.py
 
       - name: Prepare installer directory

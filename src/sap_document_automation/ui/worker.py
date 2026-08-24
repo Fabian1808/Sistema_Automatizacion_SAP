@@ -7,7 +7,7 @@ from PySide6.QtCore import QThread, Signal
 from ..modules.base import ProcessResult
 from ..sap.sap_connection import SapConnection
 from ..services.file_service import FileService
-from ..services.state_service import StateService, DocumentState
+from ..services.state_service import DocumentState, StateService
 
 
 class DocumentWorker(QThread):

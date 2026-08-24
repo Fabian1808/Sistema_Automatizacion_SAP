@@ -1,13 +1,13 @@
 from __future__ import annotations
-import time
+
 import ctypes
 import ctypes.wintypes
-from pathlib import Path
-from typing import Optional, List
+import time
 from dataclasses import dataclass
+from pathlib import Path
+from typing import List, Optional
 
 from ..core.exceptions import SapError
-
 
 # Constantes Windows API
 WM_SETTEXT = 0x000C
@@ -137,7 +137,6 @@ class NativeDialogService:
         """Busca la ventana 'Guardar como' usando EnumWindows."""
         timeout = timeout or self.DIALOG_TIMEOUT
         deadline = time.monotonic() + timeout
-        titles = [t.lower() for t in self.SAVE_DIALOG_TITLES]
 
         while time.monotonic() < deadline:
             self._found_dialogs = []
@@ -218,7 +217,6 @@ class NativeDialogService:
     def _wait_for_file(self, path: str, timeout: float) -> bool:
         """Espera a que el archivo exista y sea un PDF válido."""
         import time
-        from pathlib import Path
 
         deadline = time.monotonic() + timeout
         path_obj = Path(path)

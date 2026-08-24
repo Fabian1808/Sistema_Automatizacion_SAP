@@ -1,11 +1,11 @@
-import sqlite3
-import json
 import hashlib
-from pathlib import Path
-from dataclasses import dataclass, asdict
+import json
+import sqlite3
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Optional, List, Dict, Any
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class DocumentState(str, Enum):
@@ -192,7 +192,7 @@ class StateService:
 
     def increment_attempt(self, batch_id: str, document_id: str) -> int:
         with sqlite3.connect(self.db_path) as conn:
-            cur = conn.execute(
+            conn.execute(
                 "UPDATE documents SET attempts = attempts + 1 WHERE batch_id = ? AND document_id = ?",
                 (batch_id, document_id),
             )

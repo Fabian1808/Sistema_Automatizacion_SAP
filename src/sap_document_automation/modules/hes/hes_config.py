@@ -32,12 +32,6 @@ VKEY_F5 = 5
 VKEY_F7 = 7
 VKEY_SHIFT_F1 = 13
 
-from ...services.native_dialog import (  # noqa: E402
-    DIALOG_TIMEOUT,
-    LONG_WAIT,
-    PDF_WAIT_TIMEOUT,
-    SAVE_DIALOG_TITLES,
-)
 
 ERROR_KEYWORDS = [
     "no existe",

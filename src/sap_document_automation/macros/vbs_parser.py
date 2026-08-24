@@ -1,5 +1,5 @@
 import re
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 from .macro_model import MacroStep
 
@@ -77,13 +77,11 @@ def _parse_empty_row_subroutine(sub_name: str, sub_body: str) -> Optional[MacroS
         combo_value = combo_key_match.group(1)
 
     combo_path = ""
-    key_lines = [l for l in sub_body.splitlines() if _KEY_ASSIGN.search(l)]
+    key_lines = [line for line in sub_body.splitlines() if _KEY_ASSIGN.search(line)]
     if key_lines:
         find_match = _FIND.search(key_lines[0])
         if find_match:
             combo_path = find_match.group(1).replace('" & filaEncontrada & "', '{row}')
-
-    has_setfocus = bool(_SETFOCUS.search(sub_body))
 
     if not base_cell_path:
         return None

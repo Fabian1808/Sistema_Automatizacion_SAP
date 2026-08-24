@@ -1,8 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Protocol
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 
 @dataclass
@@ -31,11 +32,11 @@ class SapWindowState:
 
 
 class ISapClient(ABC):
-    """Interfaz unificada para automatización SAP. Permite swap entre COM, API REST, mocks."""
+    """Interfaz unificada para automatizaciÃ³n SAP. Permite swap entre COM, API REST, mocks."""
 
     @abstractmethod
     def connect(self, connection_id: int = 0, session_id: int = 0) -> bool:
-        """Conecta a una sesión SAP existente."""
+        """Conecta a una sesiÃ³n SAP existente."""
         ...
 
     @abstractmethod
@@ -51,12 +52,12 @@ class ISapClient(ABC):
 
     @abstractmethod
     def find_element(self, path: str, timeout: float = 10.0) -> "SapElement":
-        """Encuentra elemento por path SAP (wnd[0]/usr/...). Lanza excepción si no existe."""
+        """Encuentra elemento por path SAP (wnd[0]/usr/...). Lanza excepciÃ³n si no existe."""
         ...
 
     @abstractmethod
     def find_optional(self, path: str) -> Optional["SapElement"]:
-        """Busca elemento sin lanzar excepción."""
+        """Busca elemento sin lanzar excepciÃ³n."""
         ...
 
     @abstractmethod
@@ -66,7 +67,7 @@ class ISapClient(ABC):
 
     @abstractmethod
     def wait_until_idle(self, timeout: float = 30.0) -> bool:
-        """Espera hasta que SAP no esté busy."""
+        """Espera hasta que SAP no estÃ© busy."""
         ...
 
     @abstractmethod

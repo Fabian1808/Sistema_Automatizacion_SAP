@@ -1,24 +1,23 @@
 from __future__ import annotations
 
+from ..core.exceptions import (
+    SapElementNotFoundError,
+    SapError,
+    SapNoSessionError,
+    SapNotRunningError,
+    SapPopupError,
+    SapScriptingDisabledError,
+    SapSessionLostError,
+)
 from ..core.interfaces import (
     ISapClient,
     SapElement,
     SapWindowState,
 )
-from ..core.exceptions import (
-    SapError,
-    SapNotRunningError,
-    SapScriptingDisabledError,
-    SapNoSessionError,
-    SapSessionLostError,
-    SapElementNotFoundError,
-    SapPopupError,
-)
-
 from .client import ComSapClient, SapClientFactory
 from .mock_client import MockSapClient
-from .session import SapSession
 from .sap_connection import SapConnection
+from .session import SapSession
 
 __all__ = [
     "ISapClient",
