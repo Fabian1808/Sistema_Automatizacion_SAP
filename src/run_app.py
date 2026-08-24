@@ -36,6 +36,8 @@ def main() -> int:
 
         # UI principal: se resuelve desde el paquete legacy mientras dura la migración
         try:
+            from sap_document_automation.services.config_service import ConfigService
+
             from sap_document_automation.ui.main_window import MainWindow  # type: ignore
         except ImportError:
             log.warning("UI legacy no disponible; mostrando ventana placeholder")
@@ -47,7 +49,7 @@ def main() -> int:
             win.show()
             return app.exec()
 
-        window = MainWindow()
+        window = MainWindow(ConfigService(), LogService())
         window.show()
         return app.exec()
 

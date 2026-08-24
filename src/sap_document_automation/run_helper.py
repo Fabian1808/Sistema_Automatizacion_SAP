@@ -33,8 +33,10 @@ def main() -> int:
         app.setStyleSheet(build_stylesheet())
 
         try:
+            from sap_document_automation.services.config_service import ConfigService
+
             from sap_document_automation.ui.main_window import MainWindow  # type: ignore
-            window = MainWindow()
+            window = MainWindow(ConfigService(), LogService())
         except ImportError:
             log.warning("UI legacy no disponible; mostrando ventana placeholder")
             window = QLabel("SAP Document Automation v1.0.0\n(UI en construcción)")

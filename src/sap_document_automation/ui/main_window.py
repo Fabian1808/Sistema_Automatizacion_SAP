@@ -8,13 +8,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .help_view import HelpView
 from .hes_view import HesView
-from .history_view import HistoryView
-from .macro_view import MacroView
-from .oc_view import OcView
 from .sap_status_widget import SapStatusWidget
-from .settings_view import SettingsView
 
 QSS = """
 QMainWindow, QStackedWidget { background: #f5f6fa; }
@@ -71,6 +66,45 @@ QProgressBar::chunk { background: #2563eb; border-radius: 6px; }
 QStatusBar { background: #ffffff; border-top: 1px solid #e5e7eb; }
 """
 
+VIEW_FACTORIES = {
+    0: lambda w: HesView(w.config, w.log_service),
+    1: lambda w: _import_oc()(w),
+    2: lambda w: _import_macro()(w.config, w.log_service),
+    3: lambda w: _import_history()(w),
+    4: lambda w: _import_settings()(w.config),
+    5: lambda w: _import_help()(w),
+}
+
+
+def _import_oc():
+    from .oc_view import OcView
+
+    return OcView
+
+
+def _import_macro():
+    from .macro_view import MacroView
+
+    return MacroView
+
+
+def _import_history():
+    from .history_view import HistoryView
+
+    return HistoryView
+
+
+def _import_settings():
+    from .settings_view import SettingsView
+
+    return SettingsView
+
+
+def _import_help():
+    from .help_view import HelpView
+
+    return HelpView
+
 
 class MainWindow(QMainWindow):
     def __init__(self, config, log_service):
@@ -79,6 +113,7 @@ class MainWindow(QMainWindow):
         self.log_service = log_service
         self.setWindowTitle("SAP Document Automation")
         self.resize(1000, 650)
+        self._views = {}
 
         central = QWidget()
         layout = QHBoxLayout(central)
@@ -101,18 +136,7 @@ class MainWindow(QMainWindow):
             self.menu.addItem(item)
 
         self.stack = QStackedWidget()
-        self.hes_view = HesView(self.config, self.log_service)
-        self.oc_view = OcView()
-        self.macro_view = MacroView(self.config, self.log_service)
-        self.history_view = HistoryView()
-        self.settings_view = SettingsView(self.config)
-        self.help_view = HelpView()
-        self.stack.addWidget(self.hes_view)
-        self.stack.addWidget(self.oc_view)
-        self.stack.addWidget(self.macro_view)
-        self.stack.addWidget(self.history_view)
-        self.stack.addWidget(self.settings_view)
-        self.stack.addWidget(self.help_view)
+        self._ensure_view(0)
 
         layout.addWidget(self.menu)
         layout.addWidget(self.stack, 1)
@@ -121,6 +145,46 @@ class MainWindow(QMainWindow):
         self.sap_status = SapStatusWidget(self.config)
         self.statusBar().addPermanentWidget(self.sap_status)
 
-        self.menu.currentRowChanged.connect(self.stack.setCurrentIndex)
+        self.menu.currentRowChanged.connect(self._on_navigate)
         self.menu.setCurrentRow(0)
         self.setStyleSheet(QSS)
+
+    def _on_navigate(self, index: int):
+        self._ensure_view(index)
+        self.stack.setCurrentIndex(index)
+
+    def _ensure_view(self, index: int):
+        if index in self._views:
+            return
+        view = VIEW_FACTORIES[index](self)
+        self.stack.insertWidget(index, view)
+        self._views[index] = view
+
+    @property
+    def hes_view(self):
+        return self._views[0]
+
+    @property
+    def oc_view(self):
+        self._ensure_view(1)
+        return self._views[1]
+
+    @property
+    def macro_view(self):
+        self._ensure_view(2)
+        return self._views[2]
+
+    @property
+    def history_view(self):
+        self._ensure_view(3)
+        return self._views[3]
+
+    @property
+    def settings_view(self):
+        self._ensure_view(4)
+        return self._views[4]
+
+    @property
+    def help_view(self):
+        self._ensure_view(5)
+        return self._views[5]

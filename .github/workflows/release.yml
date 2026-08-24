@@ -30,15 +30,18 @@ jobs:
 
       - name: Build executable con PyInstaller
         run: >
-          pyinstaller --noconfirm --clean --windowed --onefile
+          pyinstaller --noconfirm --clean --windowed --onedir
           --name SapDocumentAutomation
+          --exclude-module tkinter --exclude-module unittest
+          --exclude-module pydoc_data --exclude-module lib2to3
+          --exclude-module xmlrpc --exclude-module setuptools
           --add-data "config/sap_selectors.yaml;sap_selectors"
           src/run_app.py
 
       - name: Prepare installer directory
         run: |
           New-Item -ItemType Directory -Force -Path installer_output | Out-Null
-          Copy-Item dist/SapDocumentAutomation.exe installer_output/
+          Compress-Archive -Path dist/SapDocumentAutomation -DestinationPath installer_output/SapDocumentAutomation-portable.zip -Force
 
       - name: Install Inno Setup
         run: choco install innosetup -y --no-progress
@@ -51,7 +54,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: installer_output/*.exe
+          files: |
+            installer_output/*.exe
+            installer_output/*.zip
           body_path: RELEASE_NOTES.md
           generate_release_notes: true
           draft: false

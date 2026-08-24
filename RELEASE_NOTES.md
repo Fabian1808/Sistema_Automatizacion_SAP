@@ -1,25 +1,25 @@
-# SAP Document Automation v1.0.0
+﻿# SAP Document Automation v1.0.3
 
-Primera versión estable del sistema de automatización de descarga masiva de documentos SAP.
+Primera versiÃ³n estable del sistema de automatizaciÃ³n de descarga masiva de documentos SAP.
 
 ## Novedades
 
-### Módulo HES (ML81N)
+### MÃ³dulo HES (ML81N)
 - Descarga masiva de PDFs de Hojas de Entrada de Servicios
-- Flujo completo: búsqueda → mensajes NEU → spool SP01 → PDF
+- Flujo completo: bÃºsqueda â†’ mensajes NEU â†’ spool SP01 â†’ PDF
 - Modo dry-run para validar el flujo sin descargar
 - Idempotencia con SQLite: reanudar lotes interrumpidos
 
 ### Sistema de macros
-- Importación de macros VBS grabadas en SAP GUI
+- ImportaciÃ³n de macros VBS grabadas en SAP GUI
 - Editor visual de pasos con soporte de placeholder `{ID}`
 
 ### Seguridad
 - Credenciales cifradas con Windows DPAPI (nunca en texto plano)
-- Diálogo "Guardar como" controlado por Win32 API (sin SendKeys)
+- DiÃ¡logo "Guardar como" controlado por Win32 API (sin SendKeys)
 
-### Distribución
-- Instalador Windows (Inno Setup, español) con auto-actualización vía GitHub Releases
+### DistribuciÃ³n
+- Instalador Windows (Inno Setup, espaÃ±ol) con auto-actualizaciÃ³n vÃ­a GitHub Releases
 - CI: ruff + pytest en Python 3.11/3.12/3.13
 
 ## Requisitos

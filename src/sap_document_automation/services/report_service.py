@@ -5,8 +5,6 @@ import datetime
 from pathlib import Path
 from typing import List
 
-from openpyxl import Workbook
-
 from ..core.models import BatchSummary
 
 
@@ -17,6 +15,8 @@ class ReportService:
 
     # --- API legacy (UI run_panel) ----------------------------------------
     def export(self, results, report_name, folder, filename=None):
+        from openpyxl import Workbook
+
         folder = Path(folder)
         folder.mkdir(parents=True, exist_ok=True)
         today = datetime.date.today().isoformat()
