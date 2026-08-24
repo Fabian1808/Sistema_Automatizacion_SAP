@@ -2,8 +2,7 @@
 ; Rutas relativas a ESTE archivo (installer\): el exe queda en ..\installer_output
 
 #define AppName "SAP Document Automation"
-#define AppExePath "..\installer_output\SapDocumentAutomation.exe"
-#define AppVersion GetFileVersion(AppExePath)
+#define AppVersion "1.0.0"
 #define AppPublisher "Fabian1808"
 #define AppExeName "SapDocumentAutomation.exe"
 
@@ -21,7 +20,6 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
-ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\{#AppExeName}
 
 [Languages]
@@ -31,7 +29,7 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#AppExePath}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\installer_output\SapDocumentAutomation.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\config\sap_selectors.yaml"; DestDir: "{app}\config"; Flags: ignoreversion
 
 [Icons]

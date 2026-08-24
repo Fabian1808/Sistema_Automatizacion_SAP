@@ -45,8 +45,8 @@ jobs:
 
       - name: Build installer con Inno Setup
         run: >
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /O"installer_output"
-          installer\SapDocumentAutomation.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          "installer\SapDocumentAutomation.iss"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
