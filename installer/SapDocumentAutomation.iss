@@ -1,8 +1,8 @@
-; Inno Setup Script para SapDocumentAutomation
+﻿; Inno Setup Script para SapDocumentAutomation
 ; Rutas relativas a ESTE archivo (installer\): el exe queda en ..\installer_output
 
 #define AppName "SAP Document Automation"
-#define AppVersion "1.0.0"
+#define AppVersion "1.0.1"
 #define AppPublisher "Fabian1808"
 #define AppExeName "SapDocumentAutomation.exe"
 
