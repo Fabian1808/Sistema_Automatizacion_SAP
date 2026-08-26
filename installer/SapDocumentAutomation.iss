@@ -2,7 +2,7 @@
 ; Rutas relativas a ESTE archivo (installer\): el exe queda en ..\installer_output
 
 #define AppName "SAP Document Automation"
-#define AppVersion "1.0.4"
+#define AppVersion "1.0.5"
 #define AppPublisher "Fabian1808"
 #define AppExeName "SapDocumentAutomation.exe"
 
@@ -21,6 +21,7 @@ SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
 UninstallDisplayIcon={app}\{#AppExeName}
+SetupIconFile=..\assets\logo.ico
 
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
